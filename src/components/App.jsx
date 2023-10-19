@@ -17,6 +17,7 @@ export const App = () => {
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    const controller = new AbortController();
     if(!query){
       return;
     }
@@ -24,7 +25,7 @@ export const App = () => {
       try {
         setLoading(true);
         setError(false)
-        const fetchedImages = await fetchImages(query, page);
+        const fetchedImages = await fetchImages(query, page, {signal: controller.signal });
        if (query.trim() === '') {
       toast.error('Please enter valid request');
       return;
@@ -38,12 +39,17 @@ export const App = () => {
         setLoadMore(page < Math.ceil(fetchedImages.totalHits / 12)); 
               }
           catch (error) {
-        setError(true)
+            if(error.code !== "ERR_CANCELED") {
+              setError(true)
+            }
       } finally {
         setLoading(false);
       }
       }
       getImages();
+      return () => {
+        controller.abort();
+      }
   
 }, [page, query]);
 
