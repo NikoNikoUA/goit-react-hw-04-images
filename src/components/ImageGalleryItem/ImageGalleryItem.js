@@ -1,21 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import css from './ImageGalleryItem.module.css';
 import { ModalWindow } from '../Modal/Modal';
 
 export const ImageGalleryItem = ({ tags, image, largeImageURL }) => {
-  state = {
-    isModalOpen: false,
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => {
+    setIsModalOpen(true);
   };
 
-  openModal = () => {
-    this.setState({ isModalOpen: true });
+  const closeModal = () => {
+    setIsModalOpen(false);
   };
-
-  closeModal = () => {
-    this.setState({ isModalOpen: false });
-  };
-
-  const { isModalOpen } = this.state;
 
   return (
     <>
@@ -23,12 +19,12 @@ export const ImageGalleryItem = ({ tags, image, largeImageURL }) => {
         className={css.image}
         src={image}
         alt={tags}
-        onClick={this.openModal}
+        onClick={openModal}
         loading="lazy"
       />
       <ModalWindow
         isModalOpen={isModalOpen}
-        closeModal={this.closeModal}
+        closeModal={closeModal}
         largeImageURL={largeImageURL}
         tags={tags}
       />
