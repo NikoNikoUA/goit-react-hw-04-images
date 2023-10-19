@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import css from './App.module.css'
@@ -8,27 +8,24 @@ import { Button } from './Button/Button'
 import { fetchImages } from './Api/Api';
 import { Loader} from '../components/Loader/Loader'
 
-class App extends PureComponent {
-  state = {
-    query: '',
-    page: 1,
-    images: [],
-    loading: false,
-    error: false,
-    loadMore: false,
-  }
+export const App = () => {
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loadMore, setLoadMore] = useState(false);
+  const [error, setError] = useState(false);
 
-  async componentDidUpdate(prevProps, prevState) {
-  
-    
-    if (this.state.page !== prevState.page || this.state.query !== prevState.query) {
+  useEffect(() => {
+    if(!query){
+      return;
+    }
+    async function getImages() {
       try {
-        this.setState({ loading: true, error: false })
-        const { query, page } = this.state;
+        setLoading(true);
+        setError(false)
         const fetchedImages = await fetchImages(query, page);
-
-        
-        if (query.trim() === '') {
+       if (query.trim() === '') {
       toast.error('Please enter valid request');
       return;
     }
@@ -37,50 +34,45 @@ class App extends PureComponent {
           toast.info('There are no pictures matching your request')
         }
 
-        this.setState(prevState => ({
-          images: [...prevState.images, ...fetchedImages.hits],
-          loadMore: page < Math.ceil(fetchedImages.totalHits / 12),
- 
-        }))
+        setImages(prevImages => [...prevImages, ...fetchedImages.hits]);
+        setLoadMore(page < Math.ceil(fetchedImages.totalHits / 12)); 
               }
           catch (error) {
-        this.setState({ error: true })
+        setError(true)
       } finally {
-        this.setState({ loading: false });
+        setLoading(false);
       }
-    }
-  }
+      }
+      getImages();
   
-  onFormSubmit = (value) => {
-    const { query } = this.state;
-      
-    if (query === value) {
+}, [page, query]);
+
+ 
+  const onFormSubmit = (value) => {
+     if (query === value) {
       return;
     }
-      this.setState({ query: value, images: [],
-        page: 1, error: false, loadMore: false });
+    setQuery(value);
+    setImages([]);
+    setPage(1);
+    setError(false);
+    setLoadMore(false);
   }
 
-  onLoadMore = () => {
-    this.setState(prevState => ({
-         page: prevState.page + 1  
-        }));
+  const onLoadMore = () => {
+    setPage(prevPage => prevPage + 1);
   }
  
-  
-render() {
-    const { images, loading, error, loadMore} = this.state;
-  return(
+    return(
     <div className={css.App}>
-      <Searchbar onSubmit={this.onFormSubmit} />
+      <Searchbar onSubmit={onFormSubmit} />
       {error && toast.error(`Whoops, something went wrong. Try reloading the page`)}
       {loading && <Loader/>}
       {images.length > 0 && <ImageGallery images={images} />}
-      {loadMore && <Button onLoadMore={this.onLoadMore} />}
+      {loadMore && <Button onLoadMore={onLoadMore} />}
       <ToastContainer autoClose={4000} theme="colored" />
     </div>
   )
   };
-}
 
-export default App;
+
