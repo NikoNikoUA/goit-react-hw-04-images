@@ -5,12 +5,10 @@ import { ModalWindow } from '../Modal/Modal';
 export const ImageGalleryItem = ({ tags, image, largeImageURL }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
+  const modalToggle = () => {
+    setIsModalOpen(prevState => {
+      return !prevState;
+    });
   };
 
   return (
@@ -19,12 +17,12 @@ export const ImageGalleryItem = ({ tags, image, largeImageURL }) => {
         className={css.image}
         src={image}
         alt={tags}
-        onClick={openModal}
+        onClick={modalToggle}
         loading="lazy"
       />
       <ModalWindow
         isModalOpen={isModalOpen}
-        closeModal={closeModal}
+        closeModal={modalToggle}
         largeImageURL={largeImageURL}
         tags={tags}
       />
