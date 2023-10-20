@@ -1,6 +1,7 @@
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import css from './Searchbar.module.css';
 import { SlMagnifier } from 'react-icons/sl';
+import { ToastContainer, toast } from 'react-toastify';
 
 export const Searchbar = ({ onSubmit }) => {
   return (
@@ -10,6 +11,10 @@ export const Searchbar = ({ onSubmit }) => {
           value: '',
         }}
         onSubmit={(values, actions) => {
+          if (values.value.trim() === '') {
+            toast.error('Please enter valid request');
+            return;
+          }
           onSubmit(values.value);
           actions.resetForm();
         }}
@@ -34,3 +39,5 @@ export const Searchbar = ({ onSubmit }) => {
     </header>
   );
 };
+
+<ToastContainer autoClose={4000} theme="colored" />;

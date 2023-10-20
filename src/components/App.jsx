@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import css from './App.module.css'
-import { Searchbar } from './Searchbar/Searchbar'
-import { ImageGallery } from './ImageGallery/ImageGallery'
-import { Button } from './Button/Button'
+import css from './App.module.css';
+import { Searchbar } from './Searchbar/Searchbar';
+import { ImageGallery } from './ImageGallery/ImageGallery';
+import { Button } from './Button/Button';
 import { fetchImages } from './Api/Api';
-import { Loader} from '../components/Loader/Loader'
+import { Loader } from '../components/Loader/Loader';
 
 export const App = () => {
   const [query, setQuery] = useState('');
@@ -18,67 +18,61 @@ export const App = () => {
 
   useEffect(() => {
     const controller = new AbortController();
-    if(!query){
+    if (!query) {
       return;
     }
     async function getImages() {
       try {
         setLoading(true);
-        setError(false)
-        const fetchedImages = await fetchImages(query, page, {signal: controller.signal });
-       if (query.trim() === '') {
-      toast.error('Please enter valid request');
-      return;
-    }
+        setError(false);
+        const fetchedImages = await fetchImages(query, page, {
+          signal: controller.signal,
+        });
 
         if (fetchedImages.hits.length === 0) {
-          toast.info('There are no pictures matching your request')
+          toast.info('There are no pictures matching your request');
         }
 
         setImages(prevImages => [...prevImages, ...fetchedImages.hits]);
-        setLoadMore(page < Math.ceil(fetchedImages.totalHits / 12)); 
-              }
-          catch (error) {
-            if(error.code !== "ERR_CANCELED") {
-              setError(true)
-            }
+        setLoadMore(page < Math.ceil(fetchedImages.totalHits / 12));
+      } catch (error) {
+        if (error.code !== 'ERR_CANCELED') {
+          setError(true);
+        }
       } finally {
         setLoading(false);
       }
-      }
-      getImages();
-      return () => {
-        controller.abort();
-      }
-  
-}, [page, query]);
+    }
+    getImages();
+    return () => {
+      controller.abort();
+    };
+  }, [page, query]);
 
- 
-  const onFormSubmit = (value) => {
-     if (query === value) {
-      return;
+  const onFormSubmit = value => {
+    if (query === value) {
+      return toast.info('Please search something else');
     }
     setQuery(value);
     setImages([]);
     setPage(1);
     setError(false);
     setLoadMore(false);
-  }
+  };
 
   const onLoadMore = () => {
     setPage(prevPage => prevPage + 1);
-  }
- 
-    return(
+  };
+
+  return (
     <div className={css.App}>
       <Searchbar onSubmit={onFormSubmit} />
-      {error && toast.error(`Whoops, something went wrong. Try reloading the page`)}
-      {loading && <Loader/>}
+      {error &&
+        toast.error(`Whoops, something went wrong. Try reloading the page`)}
+      {loading && <Loader />}
       {images.length > 0 && <ImageGallery images={images} />}
       {loadMore && <Button onLoadMore={onLoadMore} />}
       <ToastContainer autoClose={4000} theme="colored" />
     </div>
-  )
-  };
-
-
+  );
+};
